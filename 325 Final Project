@@ -1,0 +1,679 @@
+Imports System.Data
+Imports System.Data.SqlClient
+Partial Class MIS325_project
+    Inherits System.Web.UI.Page
+    Private Shared con As New SqlConnection("Data Source=cb-ot-devst04.ad.wsu.edu; Initial Catalog=MF11zack.nakasone; Persist Security Info=True; User ID= zack.nakasone ; Password= 4bceed5b    ")
+
+    Public Shared channeladapter As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[channeldata] ORDER BY channel_id", con)
+    Public Shared videoadapter As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[videodata] ORDER BY video_id", con)
+    Public Shared videolistadapter As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[videolist] ORDER BY video_num", con)
+    Public Shared commentadapter As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[commentdata] ORDER BY comment_num", con)
+
+    Public Shared cbchannel As New SqlCommandBuilder(channeladapter)
+    Public Shared cbvideo As New SqlCommandBuilder(videoadapter)
+    Public Shared cbvideolist As New SqlCommandBuilder(videolistadapter)
+    Public Shared cbcomment As New SqlCommandBuilder(commentadapter)
+
+    Public Shared gchanneltable, gchannelddl As New DataTable
+    Public Shared gvideotable, gvideoddl As New DataTable
+    Public Shared gvideolist, gvideolistddl As New DataTable
+    Public Shared gcomment, gcommentddl As New DataTable
+
+
+    Public Shared gdachannel As New SqlDataAdapter("SELECT TOP 1 * FROM [MF11zack.nakasone].[dbo].[channeldata] ORDER BY channel_id DESC", con)
+    Public Shared gdavideo As New SqlDataAdapter("SELECT TOP 1 * FROM [MF11zack.nakasone].[dbo].[videodata] ORDER BY video_id DESC", con)
+    Public Shared gdavideolist As New SqlDataAdapter("SELECT TOP 1 * FROM [MF11zack.nakasone].[dbo].[videolist] ORDER BY video_num DESC", con)
+    Public Shared gdacomment As New SqlDataAdapter("SELECT TOP 1 * FROM [MF11zack.nakasone].[dbo].[commentdata] ORDER BY comment_num DESC", con)
+
+    Public Shared channeldisplaytable As New DataTable
+    Public Shared videodisplaytable As New DataTable
+    Public Shared videolistdisplaytable As New DataTable
+    Public Shared commentdisplaytable As New DataTable
+
+    Private Sub MIS325_hw8_Init(Sender As Object, e As EventArgs) Handles Me.Init
+        Call channeldisplay()
+        Call videogetdisplay()
+        Call videolistgetdisplay()
+        Call commentgetdisplay()
+        Call UpdateDDL()
+    End Sub
+
+
+    Private Sub videolistgetdisplay()
+        If videolistdisplaytable.Rows.Count() > 0 Then videolistdisplaytable.Rows.Clear()
+        GridView4.DataSource = Nothing
+        GridView4.DataBind()
+
+        Try
+            videolistadapter.Fill(videolistdisplaytable)
+            GridView4.DataSource = videolistdisplaytable
+            GridView4.DataBind()
+
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        End Try
+    End Sub
+    'displays gridview of table if there exists data
+    Private Sub channeldisplay()
+        If channeldisplaytable.Rows.Count() > 0 Then channeldisplaytable.Rows.Clear()
+        GridView1.DataSource = Nothing
+        GridView1.DataBind()
+
+        Try
+            channeladapter.Fill(channeldisplaytable)
+            GridView1.DataSource = channeldisplaytable
+            GridView1.DataBind()
+
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        End Try
+    End Sub
+    'displays gridview of table if there exists data
+    Private Sub videogetdisplay()
+        If videodisplaytable.Rows.Count() > 0 Then videodisplaytable.Rows.Clear()
+        GridView2.DataSource = Nothing
+        GridView2.DataBind()
+
+        Try
+            videoadapter.Fill(videodisplaytable)
+            GridView2.DataSource = videodisplaytable
+            GridView2.DataBind()
+
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        End Try
+    End Sub
+    'displays gridview of table if there exists data
+    Private Sub commentgetdisplay()
+        If commentdisplaytable.Rows.Count() > 0 Then commentdisplaytable.Rows.Clear()
+        GridView3.DataSource = Nothing
+        GridView3.DataBind()
+
+        Try
+            commentadapter.Fill(commentdisplaytable)
+            GridView3.DataSource = commentdisplaytable
+            GridView3.DataBind()
+
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        End Try
+    End Sub
+
+    Private Sub UpdateDDL()
+
+
+        If gchannelddl.Rows.Count > 0 Then gchannelddl.Clear()
+
+        If gvideoddl.Rows.Count > 0 Then gvideoddl.Rows.Clear()
+        If gcommentddl.Rows.Count > 0 Then gcommentddl.Rows.Clear()
+        If gvideolistddl.Rows.Count > 0 Then gvideolistddl.Rows.Clear()
+
+        Try
+            videoadapter.Fill(gvideoddl)
+            channeladapter.Fill(gchannelddl)
+            commentadapter.Fill(gcommentddl)
+            videolistadapter.Fill(gvideolistddl)
+            With DropDownList1
+                .DataSource = gvideoddl
+                .DataTextField = "title"
+                .DataValueField = "video_id"
+                .DataBind()
+                .Items.Insert(0, "Select a video")
+
+            End With
+            With DropDownList2
+                .DataSource = gchannelddl
+                .DataTextField = "channel_title"
+                .DataValueField = "channel_id"
+
+                .DataBind()
+                .Items.Insert(0, "Select a channel")
+            End With
+            With DeleteListDDL
+                .DataSource = gvideolistddl
+                .DataTextField = "title"
+                .DataValueField = "video_num"
+
+                .DataBind()
+                .Items.Insert(0, "Select a video")
+            End With
+            With DeleteChannelDDL
+
+                .DataSource = gchannelddl
+                .DataTextField = "channel_title"
+                .DataValueField = "channel_id"
+
+                .DataBind()
+                .Items.Insert(0, "Select a channel")
+            End With
+            With DeleteList
+                .DataSource = gvideoddl
+                .DataTextField = "title"
+                .DataValueField = "video_id"
+
+                .DataBind()
+                .Items.Insert(0, "Select a video")
+            End With
+            With DeleteCommentddl
+                .DataSource = gcommentddl
+                .DataTextField = "comment_Text"
+                .DataValueField = "comment_num"
+
+                .DataBind()
+                .Items.Insert(0, "Select a comment")
+            End With
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        End Try
+    End Sub
+
+
+
+    Protected Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        Dim insertadapter4 As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[videolist] WHERE video_id = @p1 ORDER BY video_id ", con)
+        With insertadapter4.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", DropDownList1.SelectedValue)
+        End With
+        insertadapter4.FillSchema(gvideolist, SchemaType.Mapped)
+        If gvideolist.Rows.Count > 0 Then gvideolist.Clear()
+
+        Dim dr As DataRow = gvideolist.NewRow
+        Dim deliverydt As Date
+
+
+        If DropDownList1.SelectedIndex <= 0 Then Exit Sub
+        If DropDownList2.SelectedIndex <= 0 Then Exit Sub
+
+
+
+
+        'adding rows to table
+        dr.Item("video_id") = DropDownList1.SelectedValue
+        dr.Item("channel_id") = DropDownList2.SelectedValue
+        dr.Item("title") = DropDownList1.SelectedItem.Text
+        dr.Item("channel_title") = DropDownList2.SelectedItem.Text
+        gvideolist.Rows.Add(dr)
+        Try
+            'updating database and adding rows
+
+            videolistadapter.Update(gvideolist)
+
+
+            Call videolistgetdisplay()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+
+    Protected Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Dim insertadapter1 As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[channeldata] WHERE channel_id = @p1 ORDER BY channel_id ", con)
+        With insertadapter1.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", channelID.Text.Trim)
+        End With
+        'Fills tables
+        insertadapter1.FillSchema(gchanneltable, SchemaType.Mapped)
+        If gchanneltable.Rows.Count > 0 Then gchanneltable.Clear()
+
+        Dim dr As DataRow = gchanneltable.NewRow
+        Dim channeldt As Date
+
+        'clear prior values
+        With insertadapter1.SelectCommand.Parameters
+            .Clear()
+
+            'error checking
+        End With
+        If channelID.Text = Nothing OrElse Channeldate.Text = Nothing OrElse Channeldesc.Text = Nothing OrElse Channeltitle1.Text = Nothing OrElse subscribers.Text = Nothing OrElse Channelviews.Text = Nothing Then
+            Response.Write("Enter channel Data")
+            Exit Sub
+        End If
+        If IsNumeric(Channelviews.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            Channelviews.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+
+        If IsNumeric(subscribers.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            subscribers.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+        channeldt = DateTime.Parse(Channeldate.Text)
+        If channeldt = Nothing OrElse channeldt > Today() Then
+            channeldt = Today()
+        End If
+
+        Try
+
+            'creating rows for table
+            dr.Item("channel_id") = channelID.Text
+            dr.Item("subscribers") = subscribers.Text
+            dr.Item("joined") = channeldt
+            dr.Item("channelviews") = Channelviews.Text
+            dr.Item("channeldesc") = Channeldesc.Text
+            dr.Item("channel_title") = Channeltitle1.Text
+
+
+            'adding to table and updating database
+            gchanneltable.Rows.Add(dr)
+            channeladapter.Update(gchanneltable)
+            Call channeldisplay()
+            Call UpdateDDL()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+
+
+
+    End Sub
+    Protected Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Dim insertadapter2 As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[videodata] WHERE video_id = @p1 ORDER BY video_id ", con)
+        With insertadapter2.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", Videoid.Text.Trim)
+        End With
+        insertadapter2.FillSchema(gvideotable, SchemaType.Mapped)
+        If gvideotable.Rows.Count > 0 Then gvideotable.Clear()
+
+        Dim dr As DataRow = gvideotable.NewRow
+        Dim videodt As Date
+
+        With insertadapter2.SelectCommand.Parameters
+            .Clear()
+            'error checking
+        End With
+        If Videoid.Text = Nothing OrElse Videotitle.Text = Nothing OrElse ChannelTitle.Text = Nothing OrElse Videotags.Text = Nothing OrElse Videoviews.Text = Nothing OrElse videolikes.Text = Nothing OrElse videodislikes.Text = Nothing OrElse VideoDesc.Text = Nothing OrElse videocomments.Text = Nothing Then
+            Response.Write("Enter video Data")
+            Exit Sub
+        End If
+        If IsNumeric(Videoviews.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            Videoviews.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+
+        If IsNumeric(videolikes.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            videolikes.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+
+        If IsNumeric(videodislikes.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            videodislikes.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+        If IsNumeric(videocomments.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            videocomments.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+        videodt = DateTime.Parse(videodate.Text)
+        If videodt = Nothing OrElse videodt > Today() Then
+            videodt = Today()
+        End If
+
+        Try
+
+            'creating rows for table
+            dr.Item("video_id") = Videoid.Text
+            dr.Item("title") = Videotitle.Text
+            dr.Item("channel_title") = ChannelTitle.Text
+            dr.Item("tags") = Videotags.Text
+            dr.Item("views") = Videoviews.Text
+            dr.Item("likes") = videolikes.Text
+            dr.Item("dislikes") = videodislikes.Text
+            dr.Item("comments") = videocomments.Text
+            dr.Item("postdate") = videodt
+            dr.Item("videodesc") = VideoDesc.Text
+
+
+            'updating database with data and adding to table
+            gvideotable.Rows.Add(dr)
+            videoadapter.Update(gvideotable)
+            Call videogetdisplay()
+            Call UpdateDDL()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+
+    Protected Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        Dim insertadapter3 As New SqlDataAdapter("SELECT * FROM [MF11zack.nakasone].[dbo].[commentdata] WHERE video_id = @p1 ORDER BY video_id ", con)
+        With insertadapter3.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", commentvidid.Text.Trim)
+        End With
+        insertadapter3.FillSchema(gcomment, SchemaType.Mapped)
+        If gcomment.Rows.Count > 0 Then gcomment.Clear()
+
+        Dim dr As DataRow = gcomment.NewRow
+        Dim commentdt As Date
+
+        With insertadapter3.SelectCommand.Parameters
+            .Clear()
+            'error checking
+        End With
+        If commenttext.Text = Nothing OrElse commentlikes.Text = Nothing OrElse replies.Text = Nothing OrElse commentvidid.Text = Nothing Then
+            Response.Write("Enter comment Data")
+            Exit Sub
+        End If
+        If IsNumeric(commentlikes.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            commentlikes.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+
+        If IsNumeric(replies.Text) = False Then
+            Response.Write("<script language = 'javascript' >alert('Use numbers please')</script>")
+            replies.BackColor = Drawing.Color.Coral
+            Exit Sub
+        End If
+
+
+
+
+        commentdt = DateTime.Parse(Commentdate.Text)
+        If commentdt = Nothing OrElse commentdt > Today() Then
+            commentdt = Today()
+        End If
+
+        Try
+
+            'adding rows to table
+            dr.Item("comment_text") = commenttext.Text
+            dr.Item("likes") = commentlikes.Text
+            dr.Item("replies") = replies.Text
+            dr.Item("channel_id") = commentchannelid.Text
+            dr.Item("video_id") = commentvidid.Text
+            dr.Item("posted") = commentdt
+
+
+            'updating database and adding rows
+            gcomment.Rows.Add(dr)
+            commentadapter.Update(gcomment)
+            Call commentgetdisplay()
+            Call UpdateDDL()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+
+
+
+    Private Sub LinkButton1_Click(sender As Object, e As EventArgs) Handles LinkButton1.Click
+        MultiView1.ActiveViewIndex = 0
+    End Sub
+
+    Private Sub LinkButton2_Click(sender As Object, e As EventArgs) Handles LinkButton2.Click
+        MultiView1.ActiveViewIndex = 1
+    End Sub
+    Private Sub LinkButton3_Click(sender As Object, e As EventArgs) Handles LinkButton3.Click
+        MultiView1.ActiveViewIndex = 2
+    End Sub
+    Private Sub LinkButton4_Click(sender As Object, e As EventArgs) Handles LinkButton4.Click
+        MultiView1.ActiveViewIndex = 3
+    End Sub
+    Private Sub LinkButton5_Click(sender As Object, e As EventArgs) Handles LinkButton5.Click
+        MultiView1.ActiveViewIndex = 4
+    End Sub
+    Private Sub LinkButton6_Click(sender As Object, e As EventArgs) Handles LinkButton6.Click
+        MultiView1.ActiveViewIndex = 5
+    End Sub
+    Private Sub LinkButton7_Click(sender As Object, e As EventArgs) Handles LinkButton7.Click
+        MultiView1.ActiveViewIndex = 6
+    End Sub
+    Private Sub LinkButton8_Click(sender As Object, e As EventArgs) Handles LinkButton8.Click
+        MultiView1.ActiveViewIndex = 7
+    End Sub
+
+
+    Protected Sub Clear_Click(sender As Object, e As EventArgs) Handles Clear.Click
+
+        channelID.Text = Nothing
+        subscribers.Text = Nothing
+        Channeldate.Text = Nothing
+        Channelviews.Text = Nothing
+        Channeldesc.Text = Nothing
+        ChannelTitle.Text = Nothing
+        GridView1.DataSource = Nothing
+        GridView1.DataBind()
+        'DELETE
+        '        FROM [MF11zack.nakasone].[dbo].[Truckers]
+    End Sub
+
+
+
+    Protected Sub Clear2_Click(sender As Object, e As EventArgs) Handles Clear2.Click
+        Videoid.Text = Nothing
+        Videotitle.Text = Nothing
+        ChannelTitle.Text = Nothing
+        Videotags.Text = Nothing
+        Videoviews.Text = Nothing
+        videolikes.Text = Nothing
+        videodislikes.Text = Nothing
+        videocomments.Text = Nothing
+        videodate = Nothing
+        VideoDesc.Text = Nothing
+
+        GridView2.DataSource = Nothing
+        GridView2.DataBind()
+        'DELETE
+        '        FROM [MF11zack.nakasone].[dbo].[Truckers]
+    End Sub
+
+    Protected Sub Clear3_Click(sender As Object, e As EventArgs) Handles Clear3.Click
+        commentlikes.Text = Nothing
+        replies.Text = Nothing
+        commenttext.Text = Nothing
+        commentchannelid.Text = Nothing
+        commentvidid.Text = Nothing
+        Commentdate.Text = Nothing
+        GridView3.DataSource = Nothing
+        GridView3.DataBind()
+        'DELETE
+        '        FROM [MF11zack.nakasone].[dbo].[Truckers]
+    End Sub
+
+    Protected Sub Clear4_Click(sender As Object, e As EventArgs) Handles Clear4.Click
+        GridView4.DataSource = Nothing
+        GridView4.DataBind()
+        DropDownList1.SelectedIndex = -1
+        DropDownList2.SelectedIndex = -1
+
+
+    End Sub
+
+    Protected Sub DeleteListbttn_Click(sender As Object, e As EventArgs) Handles DeleteListbttn.Click
+
+        Dim DTable As New DataTable
+        Dim DTCount As New SqlDataAdapter("SELECT * From [MF11zack.nakasone].[dbo].[videolist] WHERE video_num = @p1", con)
+        Dim cmdDeleteList As New SqlCommand("DELETE From [MF11zack.nakasone].[dbo].[videolist] WHERE video_num = @p1", con)
+        If DTable.Rows.Count > 0 Then DTable.Clear()
+        With cmdDeleteList.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteListDDL.SelectedValue)
+        End With
+
+        With DTCount.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteListDDL.SelectedValue)
+        End With
+
+        Try
+            DTCount.Fill(DTable)
+
+            If DTable.Rows.Count >= 1 Then
+
+                outputListtxt.Text = DeleteListDDL.SelectedItem.Text & "deleted anyway"
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteList.ExecuteNonQuery()
+                MultiView1.ActiveViewIndex = 4
+                Exit Sub
+            Else
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteList.ExecuteNonQuery()
+                outputListtxt.Text = DeleteListDDL.SelectedItem.Text & "has been deleted"
+
+                MultiView1.ActiveViewIndex = 4
+
+            End If
+            Call UpdateDDL()
+            Call videolistgetdisplay()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+
+
+    Protected Sub DeleteChannelbttn_Click(sender As Object, e As EventArgs) Handles DeleteChannelbttn.Click
+
+        Dim DTable As New DataTable
+        Dim DTCount As New SqlDataAdapter("SELECT channel_id From [MF11zack.nakasone].[dbo].[channeldata] WHERE channel_id = @p1", con)
+        Dim cmdDeleteChannel As New SqlCommand("DELETE From [MF11zack.nakasone].[dbo].[channeldata] WHERE channel_id = @p1", con)
+        If DTable.Rows.Count > 0 Then DTable.Clear()
+        With cmdDeleteChannel.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteChannelDDL.SelectedValue)
+        End With
+
+        With DTCount.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteChannelDDL.SelectedValue)
+        End With
+
+        Try
+            DTCount.Fill(DTable)
+
+            If DTable.Rows.Count >= 1 Then
+
+                outputChanneltxt.Text = DeleteChannelDDL.SelectedItem.Text & "deleted anyway"
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteChannel.ExecuteNonQuery()
+                MultiView1.ActiveViewIndex = 5
+                Exit Sub
+            Else
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteChannel.ExecuteNonQuery()
+                outputListtxt.Text = DeleteChannelDDL.SelectedItem.Text & "has been deleted"
+
+                MultiView1.ActiveViewIndex = 5
+
+            End If
+            Call UpdateDDL()
+            Call channeldisplay()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+
+    Protected Sub DeleteListb_Click(sender As Object, e As EventArgs) Handles DeleteListb.Click
+        Dim DTable As New DataTable
+        Dim DTCount As New SqlDataAdapter("SELECT * From [MF11zack.nakasone].[dbo].[videodata] WHERE video_id = @p1", con)
+        Dim cmdDeleteVideo As New SqlCommand("DELETE From [MF11zack.nakasone].[dbo].[videodata] WHERE video_id = @p1", con)
+        If DTable.Rows.Count > 0 Then DTable.Clear()
+        With cmdDeleteVideo.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteList.SelectedValue)
+        End With
+
+        With DTCount.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteList.SelectedValue)
+        End With
+
+        Try
+            DTCount.Fill(DTable)
+
+            If DTable.Rows.Count >= 1 Then
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteVideo.ExecuteNonQuery()
+                videooutputList.Text = DeleteList.SelectedItem.Text & "deleted anyway"
+                MultiView1.ActiveViewIndex = 6
+                Exit Sub
+            Else
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteVideo.ExecuteNonQuery()
+                videooutputList.Text = DeleteList.SelectedItem.Text & "has been deleted"
+                MultiView1.ActiveViewIndex = 6
+
+            End If
+            Call UpdateDDL()
+            Call videogetdisplay()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+
+    Protected Sub DeleteCommentbttn_Click(sender As Object, e As EventArgs) Handles DeleteCommentbttn.Click
+        Dim DTable As New DataTable
+        Dim DTCount As New SqlDataAdapter("SELECT * From [MF11zack.nakasone].[dbo].[commentdata] WHERE comment_num = @p1", con)
+        Dim cmdDeleteComment As New SqlCommand("DELETE From [MF11zack.nakasone].[dbo].[commentdata] WHERE comment_num = @p1", con)
+        If DTable.Rows.Count > 0 Then DTable.Clear()
+        With DTCount.SelectCommand.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteCommentddl.SelectedValue)
+        End With
+
+        With cmdDeleteComment.Parameters
+            .Clear()
+            .AddWithValue("@p1", DeleteCommentddl.SelectedValue)
+        End With
+
+
+        Try
+            DTCount.Fill(DTable)
+
+            If DTable.Rows.Count >= 1 Then
+
+                outputDeletetxt.Text = DeleteCommentddl.SelectedItem.Text & "deleted anyway"
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteComment.ExecuteNonQuery()
+
+                MultiView1.ActiveViewIndex = 7
+                Exit Sub
+            Else
+                If con.State = ConnectionState.Closed Then con.Open()
+                cmdDeleteComment.ExecuteNonQuery()
+                outputListtxt.Text = DeleteCommentddl.SelectedItem.Text & "has been deleted"
+
+                MultiView1.ActiveViewIndex = 7
+
+            End If
+            Call commentgetdisplay()
+            Call UpdateDDL()
+        Catch ex As Exception
+            Response.Write(ex.Message)
+        Finally
+            con.Close()
+        End Try
+    End Sub
+End Class
+
+
+'linkbuttons
+
+
